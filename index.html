@@ -37,7 +37,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 /* NAV */
 #nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surf);border-top:1px solid var(--border2);display:flex;}
 .nb{flex:1;padding:0.65rem 0.5rem 0.55rem;background:none;border:none;border-top:2px solid transparent;
-  color:var(--t2);font-size:0.62rem;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;
+  color:rgba(255,255,255,0.45);font-size:0.62rem;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:3px;letter-spacing:0.08em;text-transform:uppercase;
   transition:color 0.15s,border-color 0.15s;}
 .nb.on{color:var(--t1);border-top-color:var(--accent);font-weight:700;}
@@ -218,11 +218,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
   <div id="view-draw" class="view"><div id="drw"></div></div>
 
   <div id="toast"></div>
-
-  <div id="dbg">
-    <h4>DB DEBUG</h4>
-    <div id="dbglog">Starting…</div>
-  </div>
+</div>
 
   <nav id="nav">
     <button class="nb on"  data-v="lb"   onclick="go('lb')"  ><span class="ni">🏆</span>Standings</button>
@@ -247,16 +243,6 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 const URL0 = 'https://hblrggrbwodmkesszckk.supabase.co/rest/v1/';
 const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhibHJnZ3Jid29kbWtlc3N6Y2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTY0NjcsImV4cCI6MjA5NjQ5MjQ2N30.5F-8-D4CfSnmj2jxSlViXL_CBP8a2lDy76J6PJEJymY';
 
-// ── DEBUG ─────────────────────────────────────────────────────────────────────
-const LOG = [];
-function log(msg) {
-  const t = new Date().toLocaleTimeString();
-  LOG.unshift(t + ' ' + msg);
-  if (LOG.length > 20) LOG.pop();
-  const el = document.getElementById('dbglog');
-  if (el) el.textContent = LOG.join('\n');
-  console.log(msg);
-}
 
 // ── FETCH WRAPPER ─────────────────────────────────────────────────────────────
 async function api(path, method, body) {
@@ -308,17 +294,19 @@ function flagCode(name) {
   var n = name.trim();
   if (FC[n]) return FC[n];
   for (var k in FC) { if (k.toLowerCase()===n.toLowerCase()) return FC[k]; }
-  log('⚠ no flag for: [' + name + ']');
   return null;
 }
-// Returns an <img> tag for the flag (works on Windows)
+// Returns an <img> tag for the flag - uses flagcdn.com (works on all OS incl Windows)
 function flagImg(name, size) {
   size = size || 20;
   var code = flagCode(name);
-  if (!code) return '<span style="opacity:0.3">🏳</span>';
-  return '<img src="https://flagcdn.com/' + size + 'x' + Math.round(size*0.75) + '/' + code + '.png" '
-       + 'style="width:' + size + 'px;height:' + Math.round(size*0.75) + 'px;border-radius:2px;vertical-align:middle;object-fit:cover" '
-       + 'alt="' + name + '" onerror="this.style.display='none'">';
+  if (!code) return '<span style="opacity:0.3;font-size:' + size + 'px">🏳</span>';
+  var h = Math.round(size * 0.75);
+  // flagcdn.com/w{width}/{code}.png works for standard ISO + gb-eng, gb-sct subdivisions
+  var url = 'https://flagcdn.com/w' + (size * 2) + '/' + code + '.png';
+  return '<img src="' + url + '" width="' + size + '" height="' + h + '" '
+       + 'style="border-radius:2px;vertical-align:middle;object-fit:cover;display:inline-block" '
+       + 'alt="' + name + '" loading="lazy" onerror="this.replaceWith(document.createTextNode(\'\'))">';
 }
 // Returns flag img + name as a pill for leaderboard preview
 function flagPill(name) {
@@ -363,9 +351,8 @@ async function load() {
       api('team_progress?select=*'),
     ]);
     PP = results[0]; TT = results[1]; PK = results[2]; PR = results[3];
-    log('Loaded: ' + PP.length + ' players, ' + TT.length + ' teams, ' + PK.length + ' picks, ' + PR.length + ' progress');
     // Log first team name to check for encoding issues
-    if (TT.length) log('First team name: [' + TT[0].name + '] flag field: [' + TT[0].flag + ']');
+    if (TT.length)
     setStatus('live','Live');
     renderAll();
   } catch(e) {
@@ -465,10 +452,10 @@ async function doDraw() {
 
 // ── TOGGLE STAGE ──────────────────────────────────────────────────────────────
 function toggleStage(tid, sk) {
-  log('CLICK toggleStage tid=' + tid + ' sk=' + sk);
   var si = -1;
   for(var i=0;i<STAGES.length;i++) if(STAGES[i].key===sk){ si=i; break; }
-  if(si<0){ log('ERROR: stage not found: '+sk); return; }
+  if(si<0){
+ return; }
   var stage = STAGES[si];
   var reached = progFor(tid);
   var isOn = reached.indexOf(sk) >= 0;
@@ -510,7 +497,6 @@ function toggleStage(tid, sk) {
     if(epid){ var sub=document.getElementById('psub'); if(sub) sub.textContent=ppts(epid)+' pts total'; }
     renderLB();
   }).catch(function(e){
-    log('✗ toggle error: '+e.message);
     toast('❌ Failed: '+e.message.slice(0,80));
   }).finally(function(){
     var btns2=document.querySelectorAll('.stbtn-'+tid);
