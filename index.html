@@ -380,11 +380,9 @@ const FLAGS={
   'Qatar':'🇶🇦','Jordan':'🇯🇴','Uzbekistan':'🇺🇿','Iraq':'🇮🇶',
   'Panama':'🇵🇦','Honduras':'🇭🇳','Jamaica':'🇯🇲','New Zealand':'🇳🇿',
 };
-// Try hardcoded map first, then DB flag column if it looks like emoji (len > 2), else placeholder
-function flag(name, dbFlag){
-  if(FLAGS[name]) return FLAGS[name];
-  if(dbFlag && [...dbFlag].length > 1) return dbFlag;
-  return '🏳️';
+// Only use hardcoded map - DB flag column just stores ISO codes like "JP", ignore it
+function flag(name){
+  return FLAGS[name] || '🏳️';
 }
 
 /* ── CONF COLOURS ─────────────────────────────────────────── */
@@ -512,10 +510,13 @@ async function confirmDraw(){
 
 /* ── TOGGLE STAGE ─────────────────────────────────────────── */
 async function toggleStage(tid,sk){
+  dbg('toggleStage called: team='+tid+' stage='+sk);
+  try{
   const si=STAGES.findIndex(s=>s.key===sk);
   const stage=STAGES[si];
   const reached=progFor(tid);
   const isOn=reached.includes(sk);
+  dbg('stage idx='+si+' isOn='+isOn+' reached='+JSON.stringify(reached));
   document.querySelectorAll('.tm'+tid).forEach(b=>b.disabled=true);
   try{
     if(!isOn){
@@ -534,12 +535,16 @@ async function toggleStage(tid,sk){
     if(epid){const e=document.getElementById('psub');if(e)e.textContent=ppts(epid)+' pts total';}
     renderLB();
   }catch(e){
+    dbg('✗ inner error: '+e.message);
     console.error('toggleStage error:', e);
-    toast('❌ '+( e.message.includes('RLS')||e.message.includes('policy')||e.message.includes('permission')
-      ? 'Permission denied — disable RLS in Supabase for team_progress table'
-      : 'Save failed: '+e.message.slice(0,80)));
+    toast('❌ Save failed: '+e.message.slice(0,100));
   }finally{
     document.querySelectorAll('.tm'+tid).forEach(b=>b.disabled=false);
+  }
+  }catch(outerE){
+    dbg('✗ OUTER error: '+outerE.message);
+    console.error('outer toggleStage error:', outerE);
+    toast('❌ JS Error: '+outerE.message.slice(0,100));
   }
 }
 
@@ -568,7 +573,7 @@ function renderLB(){
   <div class="grid">`;
   rows.forEach((p,i)=>{
     const mypicks=picksFor(p.id);
-    const flagStr=mypicks.slice(0,6).map(pk=>{const t=byId(TT,pk.team_id);return flag(t?.name||'',t?.flag)}).join(' ')
+    const flagStr=mypicks.slice(0,6).map(pk=>{const t=byId(TT,pk.team_id);return flag(t?.name||'')}).join(' ')
       +(mypicks.length>6?` <span style="color:var(--t3);font-size:0.78rem">+${mypicks.length-6}</span>`:'');
     const isTop=p.rank===1&&p.pts>0;
     const rankHtml=p.rank<=3
@@ -646,7 +651,7 @@ function renderDetail(pid){
     const pts=tpts(t.id);
     h+=`<div class="team-card">
       <div class="team-top">
-        <span class="team-flag">${flag(t.name, t.flag)}</span>
+        <span class="team-flag">${flag(t.name)}</span>
         <div class="team-info">
           <div class="team-name">${t.name}${pk.is_bonus?'<span class="bonus-badge">Bonus</span>':''}</div>
           <div class="team-conf" style="color:${CC[t.confederation]||'var(--t2)'}">${t.confederation}</div>
@@ -684,7 +689,7 @@ function renderDraw(){
           <span class="draw-pts">${pts} pts</span>
         </div>
         <div class="pills">
-          ${mypicks.map(pk=>{const t=byId(TT,pk.team_id);return t?`<span class="pill${pk.is_bonus?' bonus':''}">${flag(t.name,t.flag)} ${t.name}${pk.is_bonus?' ⭐':''}</span>`:''}).join('')}
+          ${mypicks.map(pk=>{const t=byId(TT,pk.team_id);return t?`<span class="pill${pk.is_bonus?' bonus':''}">${flag(t.name)} ${t.name}${pk.is_bonus?' ⭐':''}</span>`:''}).join('')}
         </div>
       </div>`;
     });
