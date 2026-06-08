@@ -75,7 +75,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;font-size:1
   letter-spacing:0.08em;text-transform:uppercase;
   transition:color 0.15s,border-color 0.15s;
 }
-.nav-btn.active{color:var(--accent-hi);border-top-color:var(--accent);}
+.nav-btn.active{color:#ffffff;border-top-color:#4f8ef7;}
 .nav-icon{font-size:1.2rem;}
 
 /* ─── VIEWS ──────────────────────────────────────────────── */
@@ -291,6 +291,12 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;font-size:1
     </div>
   </div>
 
+
+  <!-- DEBUG PANEL - remove after fixing -->
+  <div id="dbg-wrap" style="position:fixed;top:70px;right:0;z-index:999;max-width:340px;background:rgba(0,0,0,0.92);border:1px solid #f87171;border-right:none;border-radius:8px 0 0 8px;padding:0.5rem 0.75rem;font-size:0.65rem;font-family:monospace;color:#34d399;line-height:1.6;max-height:220px;overflow:auto;">
+    <div style="color:#f87171;font-weight:700;margin-bottom:4px;">DB DEBUG LOG</div>
+    <pre id="dbg" style="margin:0;white-space:pre-wrap;word-break:break-all;"></pre>
+  </div>
   <div id="view-leaderboard" class="view active">
     <div id="lb-content">
       <div class="skel" style="height:72px"></div>
@@ -327,22 +333,38 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;font-size:1
 const SB  = 'https://hblrggrbwodmkesszckk.supabase.co';
 const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhibHJnZ3Jid29kbWtlc3N6Y2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTY0NjcsImV4cCI6MjA5NjQ5MjQ2N30.5F-8-D4CfSnmj2jxSlViXL_CBP8a2lDy76J6PJEJymY';
 async function q(path, opts){
-  const method = opts?.method || 'GET';
+  const method = (opts?.method || 'GET').toUpperCase();
   const headers = {
     'Content-Type': 'application/json',
     'apikey': KEY,
     'Authorization': 'Bearer ' + KEY,
   };
-  // Only ask for representation on POST/PATCH, not DELETE (causes issues)
   if(method === 'POST' || method === 'PATCH') headers['Prefer'] = 'return=representation';
-  const res = await fetch(SB + '/rest/v1/' + path, { headers, ...opts });
+  // Build fetch options explicitly - don't spread opts to avoid header override
+  const fetchOpts = { method, headers };
+  if(opts?.body) fetchOpts.body = opts.body;
+  dbg('→ '+method+' '+path.split('?')[0]);
+  const res = await fetch(SB + '/rest/v1/' + path, fetchOpts);
   if(!res.ok){
     const body = await res.text();
+    dbg('✗ '+res.status+': '+body.slice(0,120));
     throw new Error(body);
   }
-  if(method === 'DELETE') return [];
+  if(method === 'DELETE') { dbg('✓ deleted'); return []; }
   const txt = await res.text();
-  return txt ? JSON.parse(txt) : [];
+  const parsed = txt ? JSON.parse(txt) : [];
+  dbg('✓ '+method+' ok'+(Array.isArray(parsed)?' ('+parsed.length+' rows)':''));
+  return parsed;
+}
+
+// Debug panel - visible in top right corner
+const _dbgLines = [];
+function dbg(msg){
+  const t = new Date().toLocaleTimeString();
+  _dbgLines.unshift('['+t+'] '+msg);
+  if(_dbgLines.length > 12) _dbgLines.pop();
+  const el = document.getElementById('dbg');
+  if(el) el.textContent = _dbgLines.join('\n');
 }
 
 /* ── FLAG MAP ─────────────────────────────────────────────── */
