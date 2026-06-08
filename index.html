@@ -107,7 +107,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 /* TEAM CARD */
 .tc{background:var(--surf);border:1px solid var(--border2);border-radius:var(--rl);padding:1rem 1.1rem;margin-bottom:0.75rem;}
 .tctop{display:flex;align-items:center;gap:0.85rem;margin-bottom:0.9rem;}
-.tcflag{font-size:2.1rem;line-height:1;flex-shrink:0;}
+.tcflag{line-height:1;flex-shrink:0;display:flex;align-items:center;}
 .tcinfo{flex:1;min-width:0;}
 .tcname{font-size:0.95rem;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;}
 .tcconf{font-size:0.72rem;font-weight:600;margin-top:2px;}
@@ -286,33 +286,43 @@ async function api(path, method, body) {
   }
 }
 
-// ── FLAG MAP ──────────────────────────────────────────────────────────────────
-const F = {
-  'United States':'🇺🇸','Canada':'🇨🇦','Mexico':'🇲🇽',
-  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','France':'🇫🇷','Spain':'🇪🇸','Germany':'🇩🇪','Portugal':'🇵🇹',
-  'Netherlands':'🇳🇱','Belgium':'🇧🇪','Croatia':'🇭🇷','Switzerland':'🇨🇭','Austria':'🇦🇹',
-  'Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Norway':'🇳🇴','Turkiye':'🇹🇷','Turkey':'🇹🇷','Türkiye':'🇹🇷',
-  'Sweden':'🇸🇪','Czechia':'🇨🇿','Bosnia & Herz.':'🇧🇦','Bosnia':'🇧🇦',
-  'Argentina':'🇦🇷','Brazil':'🇧🇷','Uruguay':'🇺🇾','Colombia':'🇨🇴','Ecuador':'🇪🇨','Paraguay':'🇵🇾',
-  'Morocco':'🇲🇦','Senegal':'🇸🇳','Egypt':'🇪🇬','Algeria':'🇩🇿','Ghana':'🇬🇭',
-  "Cote d'Ivoire":'🇨🇮',"Côte d'Ivoire":'🇨🇮','Ivory Coast':'🇨🇮',
-  'Tunisia':'🇹🇳','South Africa':'🇿🇦','Cabo Verde':'🇨🇻','Cape Verde':'🇨🇻','DR Congo':'🇨🇩','Congo':'🇨🇩',
-  'Japan':'🇯🇵','South Korea':'🇰🇷','Korea Republic':'🇰🇷','Iran':'🇮🇷','Saudi Arabia':'🇸🇦',
-  'Australia':'🇦🇺','Qatar':'🇶🇦','Jordan':'🇯🇴','Uzbekistan':'🇺🇿','Iraq':'🇮🇶',
-  'Panama':'🇵🇦','Honduras':'🇭🇳','Jamaica':'🇯🇲','New Zealand':'🇳🇿',
+// ── FLAG CODES ───────────────────────────────────────────────────────────────
+// Maps team name -> ISO 3166-1 alpha-2 code for flag images (works on all OS)
+const FC = {
+  'United States':'us','Canada':'ca','Mexico':'mx',
+  'England':'gb-eng','France':'fr','Spain':'es','Germany':'de','Portugal':'pt',
+  'Netherlands':'nl','Belgium':'be','Croatia':'hr','Switzerland':'ch','Austria':'at',
+  'Scotland':'gb-sct','Norway':'no','Türkiye':'tr','Turkiye':'tr','Turkey':'tr',
+  'Sweden':'se','Czechia':'cz','Bosnia & Herz.':'ba','Bosnia':'ba',
+  'Argentina':'ar','Brazil':'br','Uruguay':'uy','Colombia':'co','Ecuador':'ec','Paraguay':'py',
+  'Morocco':'ma','Senegal':'sn','Egypt':'eg','Algeria':'dz','Ghana':'gh',
+  "Côte d'Ivoire":'ci',"Cote d'Ivoire":'ci','Ivory Coast':'ci',
+  'Tunisia':'tn','South Africa':'za','Cabo Verde':'cv','Cape Verde':'cv',
+  'DR Congo':'cd','Congo':'cd',
+  'Japan':'jp','South Korea':'kr','Korea Republic':'kr','Iran':'ir','Saudi Arabia':'sa',
+  'Australia':'au','Qatar':'qa','Jordan':'jo','Uzbekistan':'uz','Iraq':'iq',
+  'Panama':'pa','Honduras':'hn','Jamaica':'jm','New Zealand':'nz',
 };
-function flag(name) {
-  if (!name) return '🏳️';
-  if (F[name]) return F[name];
-  // fuzzy: try trimmed
-  const t = name.trim();
-  if (F[t]) return F[t];
-  // try first word match
-  for (const k of Object.keys(F)) {
-    if (k.toLowerCase() === t.toLowerCase()) return F[k];
-  }
+function flagCode(name) {
+  if (!name) return null;
+  var n = name.trim();
+  if (FC[n]) return FC[n];
+  for (var k in FC) { if (k.toLowerCase()===n.toLowerCase()) return FC[k]; }
   log('⚠ no flag for: [' + name + ']');
-  return '🏳️';
+  return null;
+}
+// Returns an <img> tag for the flag (works on Windows)
+function flagImg(name, size) {
+  size = size || 20;
+  var code = flagCode(name);
+  if (!code) return '<span style="opacity:0.3">🏳</span>';
+  return '<img src="https://flagcdn.com/' + size + 'x' + Math.round(size*0.75) + '/' + code + '.png" '
+       + 'style="width:' + size + 'px;height:' + Math.round(size*0.75) + 'px;border-radius:2px;vertical-align:middle;object-fit:cover" '
+       + 'alt="' + name + '" onerror="this.style.display='none'">';
+}
+// Returns flag img + name as a pill for leaderboard preview
+function flagPill(name) {
+  return flagImg(name, 18);
 }
 
 // ── CONF COLOURS ──────────────────────────────────────────────────────────────
@@ -539,11 +549,11 @@ function renderLB() {
     var p = rows[i];
     var picks = picksFor(p.id);
     var flags = '';
-    for (var j=0; j<Math.min(picks.length,6); j++) {
+    for (var j=0; j<Math.min(picks.length,4); j++) {
       var t = byId(TT, picks[j].team_id);
-      if (t) flags += flag(t.name) + ' ';
+      if (t) flags += '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:5px;font-size:0.72rem;color:var(--t2)">' + flagImg(t.name,16) + ' ' + t.name + '</span>';
     }
-    if (picks.length > 6) flags += '<span style="color:var(--t3);font-size:0.78rem">+' + (picks.length-6) + '</span>';
+    if (picks.length > 4) flags += '<span style="color:var(--t3);font-size:0.72rem">+' + (picks.length-4) + ' more</span>';
     var rankHtml = p.rank <= 3
       ? '<div class="lbrank"><span class="lbmed">' + MEDALS[p.rank-1] + '</span></div>'
       : '<div class="lbrank"><span class="lbpos">' + ORD(p.rank) + '</span></div>';
@@ -610,7 +620,7 @@ function renderDetail(pid) {
     var conf = t.confederation || t.conf || '';
     h += '<div class="tc">'
        + '<div class="tctop">'
-       + '<span class="tcflag">' + flag(t.name) + '</span>'
+       + '<span class="tcflag">' + flagImg(t.name, 36) + '</span>'
        + '<div class="tcinfo">'
        + '<div class="tcname">' + t.name + (pk.is_bonus ? '<span class="bonus">Bonus</span>' : '') + '</div>'
        + '<div class="tcconf" style="color:' + (CC[conf]||'var(--t2)') + '">' + conf + '</div>'
@@ -645,7 +655,7 @@ function renderDraw() {
       h += '<div class="dc"><div class="dch"><span class="dcn">' + p.name + '</span><span class="dcp">' + pts + ' pts</span></div><div class="pills">';
       for (var j=0; j<picks.length; j++) {
         var t = byId(TT, picks[j].team_id);
-        if (t) h += '<span class="pill' + (picks[j].is_bonus?' bon':'') + '">' + flag(t.name) + ' ' + t.name + (picks[j].is_bonus?' ⭐':'') + '</span>';
+        if (t) h += '<span class="pill' + (picks[j].is_bonus?' bon':'') + '">' + flagImg(t.name, 18) + ' ' + t.name + (picks[j].is_bonus?' ⭐':'') + '</span>';
       }
       h += '</div></div>';
     }
