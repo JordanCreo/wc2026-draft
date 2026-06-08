@@ -10,7 +10,7 @@
   --bg:#0b0f19; --surf:#131929; --surf2:#1a2236; --surf3:#202b40;
   --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.06);
   --accent:#4f8ef7; --green:#34d399; --red:#f87171; --amber:#fbbf24;
-  --t1:#ffffff; --t2:#8fa3bf; --t3:#4d6380;
+  --t1:#ffffff; --t2:#a0aec0; --t3:#6b7280;
   --r:14px; --rl:18px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -26,7 +26,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
   position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
 .hdr-l{display:flex;align-items:center;gap:0.8rem;}
 .hdr-title{font-size:1.15rem;font-weight:800;color:var(--t1);letter-spacing:-0.02em;line-height:1.1;}
-.hdr-sub{font-size:0.65rem;font-weight:600;color:var(--t2);letter-spacing:0.12em;text-transform:uppercase;}
+.hdr-sub{font-size:0.65rem;font-weight:600;color:rgba(255,255,255,0.6);letter-spacing:0.12em;text-transform:uppercase;}
 #sync-pill{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--border);
   border-radius:99px;padding:0.32rem 0.85rem;font-size:0.75rem;font-weight:600;color:var(--t1);white-space:nowrap;}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
@@ -50,7 +50,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 /* PAGE HEAD */
 .ph{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.25rem;gap:1rem;flex-wrap:wrap;}
 .pt{font-size:1.5rem;font-weight:800;color:var(--t1);letter-spacing:-0.025em;}
-.ps{font-size:0.78rem;font-weight:500;color:var(--t2);}
+.ps{font-size:0.78rem;font-weight:500;color:rgba(255,255,255,0.6);}
 
 /* GRID */
 .grid{display:grid;grid-template-columns:1fr;gap:0.75rem;}
@@ -64,10 +64,10 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 .lbr{display:flex;align-items:center;gap:1rem;cursor:pointer;}
 .lbrank{width:42px;text-align:center;flex-shrink:0;}
 .lbmed{font-size:1.6rem;line-height:1;}
-.lbpos{font-size:0.9rem;font-weight:800;color:var(--t2);}
+.lbpos{font-size:0.9rem;font-weight:800;color:rgba(255,255,255,0.75);}
 .lbbody{flex:1;min-width:0;}
 .lbname{font-size:1rem;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lbname span{color:var(--t2);font-weight:500;}
+.lbname span{color:rgba(255,255,255,0.65);font-weight:500;}
 .lbflags{font-size:1.05rem;margin-top:3px;}
 .lbr-right{text-align:right;flex-shrink:0;}
 .lbpts{font-size:2rem;font-weight:800;line-height:1;color:var(--t3);}
@@ -77,14 +77,14 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 
 /* POINTS KEY */
 .pk{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r);padding:1rem 1.1rem;margin-top:1.1rem;}
-.pkt{font-size:0.68rem;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.7rem;}
+.pkt{font-size:0.68rem;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.7rem;}
 .pkg{display:grid;grid-template-columns:repeat(3,1fr);gap:0.45rem;}
 @media(min-width:500px){.pkg{grid-template-columns:repeat(6,1fr);}}
 .pki{background:var(--surf);border:1px solid var(--border2);border-radius:8px;padding:0.55rem 0.25rem;
   display:flex;flex-direction:column;align-items:center;gap:2px;}
 .pkii{font-size:1.1rem;}
 .pkip{font-size:0.82rem;font-weight:800;color:var(--t1);}
-.pkil{font-size:0.57rem;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:0.06em;text-align:center;}
+.pkil{font-size:0.57rem;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;text-align:center;}
 
 /* PERSON LIST */
 .psnbtn{width:100%;display:flex;justify-content:space-between;align-items:center;
@@ -102,7 +102,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 /* PERSON HEADER */
 .psnhdr{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap;}
 .psnname{font-size:1.1rem;font-weight:800;color:var(--t1);}
-.psnsub{font-size:0.8rem;font-weight:500;color:var(--t2);margin-top:1px;}
+.psnsub{font-size:0.8rem;font-weight:500;color:rgba(255,255,255,0.6);margin-top:1px;}
 
 /* TEAM CARD */
 .tc{background:var(--surf);border:1px solid var(--border2);border-radius:var(--rl);padding:1rem 1.1rem;margin-bottom:0.75rem;}
@@ -120,7 +120,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.45rem;}
 @media(min-width:520px){.sgrid{grid-template-columns:repeat(6,1fr);}}
 .sb{padding:0.6rem 0.25rem;border-radius:9px;border:1px solid var(--border2);background:var(--surf2);
-  color:var(--t2);font-size:0.62rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center;line-height:1.4;transition:all 0.13s;}
+  color:rgba(255,255,255,0.55);font-size:0.62rem;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;text-align:center;line-height:1.4;transition:all 0.13s;}
 .sb:hover:not(:disabled){background:var(--surf3);border-color:var(--border);color:var(--t1);}
 .sb.on{background:rgba(79,142,247,0.16);border-color:rgba(79,142,247,0.5);color:#fff;}
 .sb:active:not(:disabled){transform:scale(0.94);}
@@ -158,7 +158,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 
 /* EMPTY */
 .empty{text-align:center;padding:4rem 1rem;}
-.empty p{color:var(--t2);margin-bottom:1.5rem;font-size:0.95rem;}
+.empty p{color:rgba(255,255,255,0.6);margin-bottom:1.5rem;font-size:0.95rem;}
 
 /* SKELETON */
 .skel{background:linear-gradient(90deg,var(--surf) 25%,var(--surf2) 50%,var(--surf) 75%);
@@ -184,7 +184,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 #modal{background:var(--surf);border:1px solid var(--border);border-radius:20px 20px 0 0;
   padding:1.75rem 1.5rem;width:100%;max-width:520px;animation:up 0.26s ease;}
 #modal h3{font-size:1.1rem;font-weight:800;color:var(--t1);margin-bottom:0.5rem;}
-#modal p{font-size:0.88rem;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
+#modal p{font-size:0.88rem;color:rgba(255,255,255,0.65);margin-bottom:1.5rem;line-height:1.6;}
 .mbtns{display:flex;gap:0.75rem;}
 .mbtns button{flex:1;padding:0.78rem;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;}
 .mc{background:var(--surf2);border:1px solid var(--border);color:var(--t1);}
@@ -529,11 +529,17 @@ function renderLB() {
     var p = rows[i];
     var picks = picksFor(p.id);
     var flags = '';
-    for (var j=0; j<Math.min(picks.length,4); j++) {
+    for (var j=0; j<picks.length; j++) {
       var t = byId(TT, picks[j].team_id);
-      if (t) flags += '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:5px;font-size:0.72rem;color:var(--t2)">' + flagImg(t.name,16) + ' ' + t.name + '</span>';
+      if (!t) continue;
+      var isBon = picks[j].is_bonus;
+      flags += '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:4px;margin-bottom:2px;'
+             + 'font-size:0.7rem;color:#fff;background:' + (isBon ? 'rgba(251,191,36,0.18)' : 'rgba(255,255,255,0.07)') + ';'
+             + 'border:1px solid ' + (isBon ? 'rgba(251,191,36,0.35)' : 'rgba(255,255,255,0.1)') + ';'
+             + 'border-radius:5px;padding:2px 6px;white-space:nowrap">'
+             + flagImg(t.name, 16) + ' ' + t.name + (isBon ? ' ⭐' : '')
+             + '</span>';
     }
-    if (picks.length > 4) flags += '<span style="color:var(--t3);font-size:0.72rem">+' + (picks.length-4) + ' more</span>';
     var rankHtml = p.rank <= 3
       ? '<div class="lbrank"><span class="lbmed">' + MEDALS[p.rank-1] + '</span></div>'
       : '<div class="lbrank"><span class="lbpos">' + ORD(p.rank) + '</span></div>';
@@ -570,7 +576,7 @@ function renderRes() {
   }
   if (!epid) {
     var rows = getLB();
-    var h = '<div class="ph"><span class="pt">Update Results</span></div><p style="font-size:0.88rem;color:var(--t2);margin-bottom:1rem">Select a player to mark their teams through the tournament.</p>';
+    var h = '<div class="ph"><span class="pt">Update Results</span></div><p style="font-size:0.88rem;color:rgba(255,255,255,0.65);margin-bottom:1rem">Select a player to mark their teams through the tournament.</p>';
     for (var i=0; i<rows.length; i++) {
       var p = rows[i];
       h += '<button class="psnbtn" onclick="goTo(' + p.id + ')">' + p.name + '<span class="psnpts">' + p.pts + ' pts ›</span></button>';
@@ -603,7 +609,7 @@ function renderDetail(pid) {
        + '<span class="tcflag">' + flagImg(t.name, 36) + '</span>'
        + '<div class="tcinfo">'
        + '<div class="tcname">' + t.name + (pk.is_bonus ? '<span class="bonus">Bonus</span>' : '') + '</div>'
-       + '<div class="tcconf" style="color:' + (CC[conf]||'var(--t2)') + '">' + conf + '</div>'
+       + '<div class="tcconf" style="color:' + (CC[conf]||'rgba(255,255,255,0.6)') + '">' + conf + '</div>'
        + '</div>'
        + '<div id="tp' + t.id + '" class="tcpts' + (pts>0?' on':'') + '">' + pts + 'pt</div>'
        + '</div>'
