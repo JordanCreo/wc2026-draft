@@ -553,7 +553,7 @@ function renderStages(tid){
   const reached=progFor(tid);
   el.innerHTML=STAGES.map(s=>{
     const on=reached.includes(s.key);
-    return `<button class="stg${on?' on':''} tm${tid}" onclick="toggleStage(${tid},${JSON.stringify(s.key)})">
+    return `<button class="stg${on?' on':''} tm${tid}" onclick="toggleStage(${tid},'${s.key}')">
       <span class="stg-icon">${s.icon}</span>
       <span class="stg-lbl">${s.label.split(' ').pop()}</span>
       <span class="stg-pts">+${s.pts}pt</span>
