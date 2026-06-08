@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 // ── DATA ────────────────────────────────────────────────────────────────────
 const PARTICIPANTS = [
   "Jordan McConville","Jordan Thorne","Connor Jones","Eugene Tan",
-  "Jonathan Budge","Jonathan Perry","Megan Knowles","Kat Shaw","Richard Ward",
+  "Jon Budge","Jon Penny","Megan Knowles","Kat Shaw","Richard Ward",
   "Nick Coakley","Michael Partridge",
 ];
 
