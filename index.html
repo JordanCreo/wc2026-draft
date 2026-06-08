@@ -247,7 +247,6 @@ const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 // ── FETCH WRAPPER ─────────────────────────────────────────────────────────────
 async function api(path, method, body) {
   method = method || 'GET';
-  log('→ ' + method + ' ' + path.split('?')[0]);
   const h = {
     'apikey': KEY,
     'Authorization': 'Bearer ' + KEY,
@@ -260,14 +259,11 @@ async function api(path, method, body) {
     const r = await fetch(URL0 + path, opts);
     const txt = await r.text();
     if (!r.ok) {
-      log('✗ ' + r.status + ' ' + txt.slice(0, 100));
       throw new Error(txt);
     }
     const data = txt ? JSON.parse(txt) : [];
-    log('✓ ' + method + ' ok' + (Array.isArray(data) ? ' (' + data.length + ')' : ''));
     return data;
   } catch(e) {
-    log('✗ CATCH: ' + e.message.slice(0, 100));
     throw e;
   }
 }
@@ -459,7 +455,6 @@ function toggleStage(tid, sk) {
   var stage = STAGES[si];
   var reached = progFor(tid);
   var isOn = reached.indexOf(sk) >= 0;
-  log('isOn=' + isOn + ' reached=' + JSON.stringify(reached));
 
   // Disable buttons
   var btns = document.querySelectorAll('.stbtn-' + tid);
@@ -472,7 +467,6 @@ function toggleStage(tid, sk) {
     for(var k=si;k<STAGES.length;k++) toRemove.push(STAGES[k].key);
   }
 
-  log('toAdd=' + JSON.stringify(toAdd) + ' toRemove=' + JSON.stringify(toRemove));
 
   var p;
   if (toAdd.length > 0) {
