@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>⚽ WC2026 Draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;background:#070d1a;}
+  body{font-family:'DM Sans',sans-serif;color:#e2e8f0;overscroll-behavior:none;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
+  #app{min-height:100vh;background:linear-gradient(160deg,#070d1a 0%,#0d1b3e 60%,#070d1a 100%);padding-bottom:72px;}
+
+  /* HEADER */
+  #header{text-align:center;padding:1.2rem 1rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:50;background:rgba(7,13,26,0.92);backdrop-filter:blur(12px);}
+  #header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,7vw,2.8rem);letter-spacing:0.08em;background:linear-gradient(90deg,#f59e0b,#fde68a,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+  #header p{font-size:0.65rem;color:#475569;letter-spacing:0.2em;text-transform:uppercase;margin-top:2px;}
+  #sync-status{font-size:0.6rem;margin-top:5px;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:#334155;display:inline-block;flex-shrink:0;transition:background 0.3s;}
+  .dot.live{background:#22c55e;box-shadow:0 0 6px #22c55e;}
+  .dot.error{background:#ef4444;}
+  .dot.syncing{background:#f59e0b;animation:pulse 0.8s infinite;}
+
+  /* NAV */
+  #nav{position:fixed;bottom:0;left:0;right:0;background:rgba(7,13,26,0.97);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.08);display:flex;z-index:100;}
+  .nav-btn{flex:1;padding:0.65rem 0.5rem;background:none;border:none;border-top:2px solid transparent;color:#64748b;font-size:0.65rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;letter-spacing:0.05em;text-transform:uppercase;transition:color 0.2s,border-color 0.2s;}
+  .nav-btn.active{color:#f59e0b;border-top-color:#f59e0b;}
+  .nav-btn .icon{font-size:1.2rem;}
+
+  /* VIEWS */
+  .view{display:none;padding:1rem;max-width:520px;margin:0 auto;}
+  .view.active{display:block;}
+
+  /* CARDS */
+  .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:0.9rem 1rem;margin-bottom:0.6rem;}
+  .card.gold{background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.04));border-color:rgba(245,158,11,0.3);}
+
+  /* LEADERBOARD */
+  .lb-row{display:flex;align-items:center;gap:0.75rem;cursor:pointer;}
+  .lb-rank{width:36px;text-align:center;flex-shrink:0;font-family:'Bebas Neue',sans-serif;line-height:1;}
+  .lb-rank.top{font-size:1.5rem;}
+  .lb-rank.num{font-size:0.95rem;color:#64748b;}
+  .lb-name{flex:1;min-width:0;}
+  .lb-name strong{display:block;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lb-name .flags{font-size:0.95rem;letter-spacing:0.04em;margin-top:1px;}
+  .lb-pts{text-align:right;flex-shrink:0;}
+  .lb-pts .num{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1;color:#334155;}
+  .lb-pts .num.has{color:#f59e0b;}
+  .lb-pts .lbl{font-size:0.6rem;color:#475569;text-transform:uppercase;letter-spacing:0.05em;}
+  .lb-chev{color:#334155;font-size:0.8rem;flex-shrink:0;}
+
+  .points-key{margin-top:1.2rem;padding:0.9rem 1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;}
+  .points-key h4{font-size:0.65rem;color:#64748b;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;}
+  .pts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.35rem;}
+  .pts-item{font-size:0.7rem;color:#94a3b8;display:flex;gap:4px;align-items:center;}
+  .pts-item b{color:#f59e0b;}
+
+  /* RESULTS */
+  .person-list button{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:0.85rem 1rem;margin-bottom:0.5rem;color:#e2e8f0;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;}
+  .back-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:0.4rem 0.75rem;color:#94a3b8;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;}
+  .team-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:0.9rem 1rem;margin-bottom:0.75rem;}
+  .team-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.7rem;}
+  .team-flag{font-size:1.6rem;}
+  .team-name-row{font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;}
+  .bonus-badge{font-size:0.6rem;background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);border-radius:4px;padding:1px 5px;font-weight:700;letter-spacing:0.05em;}
+  .team-conf{font-size:0.7rem;}
+  .team-pts-val{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#334155;flex-shrink:0;}
+  .team-pts-val.has{color:#f59e0b;}
+
+  .stages-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.4rem;}
+  .stage-btn{padding:0.45rem 0.25rem;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:#475569;font-size:0.65rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all 0.15s;line-height:1.3;}
+  .stage-btn.on{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.15);color:#fde68a;}
+  .stage-btn .s-icon{font-size:0.9rem;}
+  .stage-btn .s-label{text-transform:uppercase;letter-spacing:0.04em;}
+  .stage-btn .s-pts{color:#334155;}
+  .stage-btn.on .s-pts{color:#f59e0b;}
+  .stage-btn:active:not(:disabled){transform:scale(0.95);}
+  .stage-btn:disabled{opacity:0.35;cursor:not-allowed;}
+
+  /* DRAW */
+  .draw-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);border-radius:6px;padding:2px 7px;font-size:0.75rem;color:#94a3b8;margin:2px;}
+  .draw-pill.bonus{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#fde68a;}
+
+  /* BUTTONS */
+  .gold-btn{padding:0.8rem 2rem;background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#000;border:none;border-radius:50px;font-weight:700;font-family:'DM Sans',sans-serif;font-size:0.95rem;cursor:pointer;letter-spacing:0.05em;box-shadow:0 0 24px rgba(245,158,11,0.35);transition:opacity 0.2s;}
+  .gold-btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .outline-btn{padding:0.65rem 1.25rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#94a3b8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;}
+
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.1em;color:#94a3b8;margin-bottom:0.75rem;}
+
+  /* TOAST */
+  #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;border:1px solid rgba(245,158,11,0.4);border-radius:50px;padding:0.55rem 1.2rem;color:#fde68a;font-size:0.85rem;font-weight:600;z-index:200;white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.5);opacity:0;transition:opacity 0.25s,transform 0.25s;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* EMPTY */
+  .empty{text-align:center;padding:3rem 1rem;}
+  .empty .e-icon{font-size:3.5rem;margin-bottom:0.75rem;}
+  .empty p{color:#64748b;margin-bottom:1.25rem;font-size:0.9rem;}
+
+  /* SKELETON */
+  .skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:10px;height:64px;margin-bottom:0.6rem;}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* MODAL */
+  #modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:flex-end;justify-content:center;}
+  #modal-overlay.show{display:flex;}
+  #modal{background:#0f1f3d;border:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-width:520px;animation:slideUp 0.3s ease;}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  #modal h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem;}
+  #modal p{font-size:0.85rem;color:#94a3b8;margin-bottom:1.25rem;line-height:1.5;}
+  .modal-btns{display:flex;gap:0.75rem;}
+  .modal-btns button{flex:1;padding:0.75rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.9rem;cursor:pointer;}
+  .modal-cancel{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;}
+  .modal-confirm{background:linear-gradient(90deg,#ef4444,#f87171);border:none;color:#fff;}
+
+  .person-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .spinning{display:inline-block;animation:spin 0.8s linear infinite;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div style="font-size:1.4rem">⚽</div>
+    <h1>World Cup 2026</h1>
+    <p>Workplace Draft</p>
+    <div id="sync-status">
+      <span class="dot syncing" id="sync-dot"></span>
+      <span id="sync-text" style="color:#f59e0b">Connecting...</span>
+    </div>
+  </div>
+
+  <div id="view-leaderboard" class="view active"><div id="lb-content"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></div>
+  <div id="view-results"     class="view"><div id="results-content"></div></div>
+  <div id="view-draw"        class="view"><div id="draw-content"></div></div>
+
+  <div id="toast"></div>
+
+  <nav id="nav">
+    <button class="nav-btn active" data-view="leaderboard" onclick="switchView('leaderboard')"><span class="icon">🏆</span>Leaderboard</button>
+    <button class="nav-btn"        data-view="results"     onclick="switchView('results')"    ><span class="icon">⚽</span>Results</button>
+    <button class="nav-btn"        data-view="draw"        onclick="switchView('draw')"       ><span class="icon">🎲</span>Draw</button>
+  </nav>
+</div>
+
+<div id="modal-overlay" onclick="closeModal()">
+  <div id="modal" onclick="event.stopPropagation()">
+    <h3>⚠️ Redraw teams?</h3>
+    <p>This will randomly reassign all 48 teams and reset everyone's points to zero. This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="modal-cancel"  onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmDraw()">Yes, Redraw</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const SB_URL = 'https://hblrggrbwodmkesszckk.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhibHJnZ3Jid29kbWtlc3N6Y2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTY0NjcsImV4cCI6MjA5NjQ5MjQ2N30.5F-8-D4CfSnmj2jxSlViXL_CBP8a2lDy76J6PJEJymY';
+const HDR = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'};
+const HDR_DEL = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+async function sb(path, opts) {
+  const res = await fetch(SB_URL+'/rest/v1/'+path, {headers: opts?.del ? HDR_DEL : HDR, ...opts});
+  if (!res.ok) throw new Error(await res.text());
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : [];
+}
+
+// ── STATIC DATA ───────────────────────────────────────────────────────────────
+const STAGES = [
+  {key:'group', label:'Group Stage',   pts:1,  icon:'🏟️'},
+  {key:'r16',   label:'Round of 16',   pts:2,  icon:'⚔️'},
+  {key:'qf',    label:'Quarter-Final', pts:3,  icon:'🔥'},
+  {key:'sf',    label:'Semi-Final',    pts:5,  icon:'⭐'},
+  {key:'final', label:'Final',         pts:8,  icon:'🥈'},
+  {key:'winner',label:'Champion',      pts:13, icon:'🏆'},
+];
+const CONF_COLOR = {Host:'#f59e0b',UEFA:'#3b82f6',CONMEBOL:'#10b981',CAF:'#ef4444',AFC:'#8b5cf6',CONCACAF:'#f97316',OFC:'#06b6d4'};
+const MEDALS = ['🥇','🥈','🥉'];
+const ORD = n => n===1?'1st':n===2?'2nd':n===3?'3rd':n+'th';
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let participants=[], teams=[], picks=[], progress=[];
+let currentView='leaderboard', editingPid=null, isSyncing=false;
+
+// ── STATUS BAR ────────────────────────────────────────────────────────────────
+function setStatus(state, text) {
+  document.getElementById('sync-dot').className = 'dot '+state;
+  const t = document.getElementById('sync-text');
+  t.textContent = text;
+  t.style.color = state==='live'?'#22c55e':state==='error'?'#ef4444':'#f59e0b';
+}
+
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+async function loadAll() {
+  setStatus('syncing','Loading...');
+  try {
+    [participants, teams, picks, progress] = await Promise.all([
+      sb('participants?order=name'),
+      sb('teams?order=name'),
+      sb('draft_picks?select=*'),
+      sb('team_progress?select=*'),
+    ]);
+    setStatus('live','Live');
+    renderAll();
+  } catch(e) {
+    setStatus('error','Connection failed — check Supabase');
+    console.error(e);
+    document.getElementById('lb-content').innerHTML =
+      `<div class="empty"><div class="e-icon">⚠️</div><p>Could not connect to database.<br>Check your Supabase project is running.</p></div>`;
+  }
+}
+
+// ── POLL every 20s ────────────────────────────────────────────────────────────
+setInterval(async () => {
+  if (isSyncing) return;
+  try {
+    const [p2, pg2] = await Promise.all([sb('draft_picks?select=*'), sb('team_progress?select=*')]);
+    picks=p2; progress=pg2;
+    setStatus('live','Live');
+    renderLeaderboard();
+    if (currentView==='results' && editingPid) renderPersonDetail(editingPid);
+    if (currentView==='draw') renderDraw();
+  } catch(e) { setStatus('error','Sync failed'); }
+}, 20000);
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
+const byId = (arr,id) => arr.find(x=>x.id===id);
+const picksFor = pid => picks.filter(p=>p.participant_id===pid);
+const progressFor = tid => progress.filter(p=>p.team_id===tid).map(p=>p.stage_key);
+const teamPts = tid => STAGES.reduce((s,st)=>s+(progressFor(tid).includes(st.key)?st.pts:0),0);
+const personPts = pid => picksFor(pid).reduce((s,pk)=>s+teamPts(pk.team_id),0);
+
+function leaderboard() {
+  const sorted=[...participants].map(p=>({...p,pts:personPts(p.id)})).sort((a,b)=>b.pts-a.pts);
+  let rank=1;
+  return sorted.map((p,i)=>{if(i>0&&sorted[i].pts<sorted[i-1].pts)rank=i+1;return{...p,rank};});
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let _tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function switchView(v) {
+  currentView=v;
+  if(v!=='results') editingPid=null;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  renderAll();
+}
+
+// ── DRAW ──────────────────────────────────────────────────────────────────────
+function askDraw(){picks.length?document.getElementById('modal-overlay').classList.add('show'):confirmDraw();}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+
+async function confirmDraw() {
+  closeModal();
+  isSyncing=true;
+  setStatus('syncing','Drawing...');
+  const btn=document.getElementById('draw-btn');
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spinning">⚽</span> Drawing...';}
+
+  try {
+    // Wipe existing data
+    await sb('team_progress?id=gt.0',{method:'DELETE',del:true});
+    await sb('draft_picks?id=gt.0',  {method:'DELETE',del:true});
+
+    const n=participants.length;
+    const shuffled=shuffle([...teams]);
+    const per=Math.floor(shuffled.length/n);
+
+    const inserts=[];
+    participants.forEach((p,i)=>{
+      shuffled.slice(i*per,(i+1)*per).forEach(t=>{
+        inserts.push({participant_id:p.id,team_id:t.id,is_bonus:false});
+      });
+    });
+    // Random bonus teams for leftovers
+    const leftovers=shuffled.slice(n*per);
+    const lucky=shuffle([...Array(n).keys()]).slice(0,leftovers.length);
+    leftovers.forEach((t,i)=>inserts.push({participant_id:participants[lucky[i]].id,team_id:t.id,is_bonus:true}));
+
+    picks=await sb('draft_picks',{method:'POST',body:JSON.stringify(inserts)});
+    progress=[];
+    setStatus('live','Live');
+    toast('✅ Teams drawn! Good luck everyone!');
+    renderAll();
+  } catch(e) {
+    setStatus('error','Draw failed');
+    toast('❌ Draw failed — see console');
+    console.error(e);
+  } finally { isSyncing=false; }
+}
+
+// ── TOGGLE STAGE ──────────────────────────────────────────────────────────────
+async function toggleStage(teamId, stageKey) {
+  const si=STAGES.findIndex(s=>s.key===stageKey);
+  const stage=STAGES[si];
+  const reached=progressFor(teamId);
+  const isOn=reached.includes(stageKey);
+
+  // Disable buttons immediately for feedback
+  document.querySelectorAll('.sb-'+teamId).forEach(b=>b.disabled=true);
+
+  try {
+    if (!isOn) {
+      const toAdd=STAGES.slice(0,si+1).filter(s=>!reached.includes(s.key)).map(s=>({team_id:teamId,stage_key:s.key}));
+      if (toAdd.length) {
+        const added=await sb('team_progress',{method:'POST',body:JSON.stringify(toAdd)});
+        progress=[...progress,...added];
+      }
+      toast(`${stage.icon} ${byId(teams,teamId)?.name} — +${stage.pts}pt`);
+    } else {
+      const toRemove=STAGES.slice(si).map(s=>s.key);
+      const keys=toRemove.join(',');
+      await sb(`team_progress?team_id=eq.${teamId}&stage_key=in.(${keys})`,{method:'DELETE',del:true});
+      progress=progress.filter(p=>!(p.team_id===teamId&&toRemove.includes(p.stage_key)));
+    }
+
+    // Update team card in place
+    renderTeamStages(teamId);
+    const pts=teamPts(teamId);
+    const ptsEl=document.getElementById('tpts-'+teamId);
+    if(ptsEl){ptsEl.textContent=pts+'pt';ptsEl.className='team-pts-val'+(pts>0?' has':'');}
+    // Update person total
+    if(editingPid){
+      const el=document.getElementById('person-total-pts');
+      if(el) el.textContent=personPts(editingPid)+' points total';
+    }
+    renderLeaderboard();
+  } catch(e) {
+    toast('❌ Save failed — check connection');
+    console.error(e);
+  } finally {
+    document.querySelectorAll('.sb-'+teamId).forEach(b=>b.disabled=false);
+  }
+}
+
+function renderTeamStages(teamId) {
+  const el=document.getElementById('stages-'+teamId);
+  if(!el) return;
+  const reached=progressFor(teamId);
+  el.innerHTML=STAGES.map(s=>{
+    const on=reached.includes(s.key);
+    return `<button class="stage-btn${on?' on':''} sb-${teamId}"
+      onclick="toggleStage(${teamId},${JSON.stringify(s.key)})">
+      <div class="s-icon">${s.icon}</div>
+      <div class="s-label">${s.label.split(' ').pop()}</div>
+      <div class="s-pts">+${s.pts}pt</div>
+    </button>`;
+  }).join('');
+}
+
+// ── RENDER: LEADERBOARD ───────────────────────────────────────────────────────
+function renderLeaderboard() {
+  const el=document.getElementById('lb-content');
+  if(!el) return;
+
+  if(picks.length===0) {
+    el.innerHTML=`<div class="empty"><div class="e-icon">⚽</div><p>No draw yet — head to the Draw tab!</p><button class="gold-btn" onclick="switchView('draw')">Go to Draw</button></div>`;
+    return;
+  }
+
+  const lb=leaderboard();
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+    <span class="section-title" style="margin:0">STANDINGS</span>
+    <span style="font-size:0.7rem;color:#475569">${participants.length} players</span>
+  </div>`;
+
+  lb.forEach((p,i)=>{
+    const myPicks=picksFor(p.id);
+    const flags=myPicks.slice(0,5).map(pk=>byId(teams,pk.team_id)?.flag||'').join(' ')
+      +(myPicks.length>5?` <small style="color:#475569;font-size:0.7rem">+${myPicks.length-5}</small>`:'');
+    const isGold=p.rank===1&&p.pts>0;
+    const rankHtml=p.rank<=3
+      ?`<div class="lb-rank top">${MEDALS[p.rank-1]}</div>`
+      :`<div class="lb-rank num">${ORD(p.rank)}</div>`;
+    const [first,...rest]=p.name.split(' ');
+    h+=`<div class="card${isGold?' gold':''}" style="animation:fadeUp 0.35s ease ${i*0.05}s both">
+      <div class="lb-row" onclick="goToPerson(${p.id})">
+        ${rankHtml}
+        <div class="lb-name">
+          <strong>${first} <span style="color:#94a3b8;font-weight:400">${rest.join(' ')}</span></strong>
+          <div class="flags">${flags}</div>
+        </div>
+        <div class="lb-pts">
+          <div class="num${p.pts>0?' has':''}">${p.pts}</div>
+          <div class="lbl">pts</div>
+        </div>
+        <div class="lb-chev">›</div>
+      </div>
+    </div>`;
+  });
+
+  h+=`<div class="points-key"><h4>Points Key</h4><div class="pts-grid">
+    ${STAGES.map(s=>`<div class="pts-item">${s.icon} <b>${s.pts}pt</b> <span style="color:#475569">${s.label.split(' ').pop()}</span></div>`).join('')}
+  </div></div>`;
+
+  el.innerHTML=h;
+}
+
+// ── RENDER: RESULTS ───────────────────────────────────────────────────────────
+function goToPerson(id){editingPid=id;switchView('results');}
+
+function renderResults() {
+  const el=document.getElementById('results-content');
+  if(!el) return;
+
+  if(picks.length===0){
+    el.innerHTML=`<div class="empty"><div class="e-icon">🎲</div><p>Run the draw first!</p><button class="gold-btn" onclick="switchView('draw')">Go to Draw</button></div>`;
+    return;
+  }
+
+  if(!editingPid){
+    const lb=leaderboard();
+    let h=`<div class="section-title">UPDATE RESULTS</div>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:1rem">Tap a person to update their teams' progress.</p>
+      <div class="person-list">`;
+    lb.forEach(p=>{
+      h+=`<button onclick="goToPerson(${p.id})">
+        <span>${p.name}</span>
+        <span style="color:#f59e0b;font-family:'Bebas Neue',sans-serif;font-size:1.1rem">${p.pts}pt ›</span>
+      </button>`;
+    });
+    h+=`</div>`;
+    el.innerHTML=h;
+    return;
+  }
+
+  renderPersonDetail(editingPid);
+}
+
+function renderPersonDetail(pid) {
+  const el=document.getElementById('results-content');
+  if(!el) return;
+  const person=byId(participants,pid);
+  if(!person){editingPid=null;renderResults();return;}
+
+  const myPicks=picksFor(pid);
+  const total=personPts(pid);
+
+  let h=`<div class="person-header">
+    <button class="back-btn" onclick="editingPid=null;renderResults()">← Back</button>
+    <div>
+      <div style="font-weight:700;font-size:1rem">${person.name}</div>
+      <div id="person-total-pts" style="font-size:0.75rem;color:#64748b">${total} points total</div>
+    </div>
+  </div>`;
+
+  myPicks.forEach(pick=>{
+    const team=byId(teams,pick.team_id);
+    if(!team) return;
+    const pts=teamPts(team.id);
+    h+=`<div class="team-card">
+      <div class="team-header">
+        <span class="team-flag">${team.flag}</span>
+        <div style="flex:1">
+          <div class="team-name-row">${team.name}${pick.is_bonus?'<span class="bonus-badge">BONUS</span>':''}</div>
+          <div class="team-conf" style="color:${CONF_COLOR[team.confederation]||'#94a3b8'}">${team.confederation}</div>
+        </div>
+        <div id="tpts-${team.id}" class="team-pts-val${pts>0?' has':''}">${pts}pt</div>
+      </div>
+      <div id="stages-${team.id}" class="stages-grid"></div>
+    </div>`;
+  });
+
+  el.innerHTML=h;
+  myPicks.forEach(pk=>renderTeamStages(pk.team_id));
+}
+
+// ── RENDER: DRAW ──────────────────────────────────────────────────────────────
+function renderDraw() {
+  const el=document.getElementById('draw-content');
+  if(!el) return;
+  const n=participants.length;
+  const per=Math.floor(teams.length/n);
+  const extra=teams.length%n;
+
+  let h=`<div class="section-title">THE DRAW</div>
+    <p style="font-size:0.85rem;color:#64748b;line-height:1.5;margin-bottom:1.25rem">
+      ${picks.length>0
+        ?'Draw is live. Redrawing resets all points.'
+        :`Assign all ${teams.length} teams across ${n} players — ${per} each, ${extra} lucky bonus teams.`}
+    </p>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      <button id="draw-btn" class="gold-btn" onclick="askDraw()">
+        ${picks.length>0?'🔄 Redraw Teams':'🎲 Draw Teams Now'}
+      </button>
+    </div>`;
+
+  if(picks.length>0){
+    participants.forEach(p=>{
+      const myPicks=picksFor(p.id);
+      const pts=personPts(p.id);
+      h+=`<div class="card">
+        <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;display:flex;justify-content:space-between">
+          <span>${p.name}</span>
+          <span style="color:#f59e0b;font-family:'Bebas Neue',sans-serif">${pts}pt</span>
+        </div>
+        <div>${myPicks.map(pk=>{
+          const t=byId(teams,pk.team_id);
+          return t?`<span class="draw-pill${pk.is_bonus?' bonus':''}">${t.flag} ${t.name}${pk.is_bonus?' ⭐':''}</span>`:'';
+        }).join('')}</div>
+      </div>`;
+    });
+  }
+
+  el.innerHTML=h;
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function renderAll(){
+  renderLeaderboard();
+  if(currentView==='results') renderResults();
+  if(currentView==='draw')    renderDraw();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
