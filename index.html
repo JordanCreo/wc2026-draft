@@ -52,7 +52,8 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 .ps{font-size:0.78rem;font-weight:500;color:rgba(255,255,255,0.55);}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:1fr;gap:0.75rem;}}
+.grid{display:grid;grid-template-columns:1fr;gap:0.75rem;}
+@media(min-width:680px){.grid{grid-template-columns:repeat(2,1fr);}}
 
 /* CARD */
 .card{background:var(--surf);border:1px solid var(--border2);border-radius:var(--rl);padding:1.1rem 1.2rem;}
@@ -63,10 +64,10 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 .lbrank{width:42px;text-align:center;flex-shrink:0;}
 .lbmed{font-size:1.6rem;line-height:1;}
 .lbpos{font-size:0.9rem;font-weight:800;color:rgba(255,255,255,0.7);}
-.lbbody{display:flex;gap:16px;flex:1;min-width:0;}
+.lbbody{flex:1;min-width:0;}
 .lbname{font-size:1rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lbname span{color:rgba(255,255,255,0.6);font-weight:500;}
-.lbflags{display:flex;flex-wrap:wrap;gap:3px;}
+.lbflags{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px;}
 .lbr-right{text-align:right;flex-shrink:0;}
 .lbpts{font-size:2rem;font-weight:800;line-height:1;color:var(--t3);}
 .lbpts.on{color:#fff;}
@@ -257,7 +258,7 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
   <nav id="nav">
     <button class="nb on" data-v="lb"   onclick="go('lb')"  ><span class="ni">&#127942;</span>Standings</button>
     <button class="nb"    data-v="res"  onclick="go('res')" ><span class="ni">&#9917;</span>Results</button>
-    <!-- <button class="nb"    data-v="draw" onclick="go('draw')"><span class="ni">&#127922;</span>Draw</button> -->
+    <button class="nb"    data-v="draw" onclick="go('draw')"><span class="ni">&#127922;</span>Draw</button>
   </nav>
 </div>
 
