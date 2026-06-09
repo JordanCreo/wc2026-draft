@@ -190,6 +190,49 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
 .mc{background:var(--surf2);border:1px solid var(--border);color:var(--t1);}
 .md{background:#dc2626;border:none;color:#fff;}
 
+
+/* DRAW / POTS */
+.pot-section{margin-bottom:1.5rem;}
+.pot-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;padding:0.6rem 1rem;border-radius:var(--r);border:1px solid;}
+.pot-header h3{font-size:0.85rem;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;}
+.pot-header p{font-size:0.75rem;opacity:0.75;margin-top:1px;}
+.pot1-hdr{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.35);color:#fde68a;}
+.pot2-hdr{background:rgba(156,163,175,0.1);border-color:rgba(156,163,175,0.3);color:#e5e7eb;}
+.pot3-hdr{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.3);color:#fed7aa;}
+.pot4-hdr{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.3);color:#bfdbfe;}
+.pot-icon{font-size:1.5rem;flex-shrink:0;}
+.pot-teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.5rem;}
+.pot-team{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r);
+  padding:0.6rem 0.75rem;display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;font-weight:600;color:var(--t1);}
+
+/* LIVE DRAW OVERLAY */
+#draw-overlay{display:none;position:fixed;inset:0;background:rgba(7,11,22,0.97);z-index:400;
+  flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+#draw-overlay.on{display:flex;}
+.draw-stage-title{font-size:0.75rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);margin-bottom:0.5rem;}
+.draw-pot-label{font-size:1.1rem;font-weight:800;margin-bottom:2rem;}
+.draw-cards-row{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-bottom:2rem;max-width:900px;}
+.draw-person-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:var(--rl);
+  padding:0.85rem 1rem;min-width:140px;text-align:center;transition:all 0.3s;
+}
+.draw-person-card .dpname{font-size:0.8rem;font-weight:700;color:var(--t1);margin-bottom:0.5rem;}
+.draw-person-card .dpteam{font-size:0.85rem;font-weight:700;min-height:1.4em;color:var(--t1);display:flex;align-items:center;justify-content:center;gap:5px;}
+.draw-person-card.revealed{border-color:var(--accent);background:rgba(79,142,247,0.12);}
+.draw-person-card.pot1r{border-color:#fbbf24;background:rgba(251,191,36,0.12);}
+.draw-person-card.pot2r{border-color:#9ca3af;background:rgba(156,163,175,0.1);}
+.draw-person-card.pot3r{border-color:#fb923c;background:rgba(251,146,60,0.1);}
+.draw-person-card.pot4r{border-color:#60a5fa;background:rgba(96,165,250,0.1);}
+.draw-progress{display:flex;gap:0.5rem;margin-top:1rem;}
+.draw-pip{width:10px;height:10px;border-radius:50%;background:var(--surf3);transition:background 0.3s;}
+.draw-pip.done{background:var(--accent);}
+.draw-pip.active{background:var(--amber);}
+#draw-skip{margin-top:1.5rem;background:none;border:1px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.5);border-radius:99px;padding:0.5rem 1.25rem;
+  font-family:'Outfit',sans-serif;font-size:0.8rem;cursor:pointer;}
+#draw-skip:hover{color:var(--t1);border-color:rgba(255,255,255,0.4);}
+
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -225,6 +268,15 @@ body{font-family:'Outfit',sans-serif;color:var(--t1);line-height:1.5;}
     <button class="nb"     data-v="res"  onclick="go('res')" ><span class="ni">⚽</span>Results</button>
     <button class="nb"     data-v="draw" onclick="go('draw')"><span class="ni">🎲</span>Draw</button>
   </nav>
+</div>
+
+
+<div id="draw-overlay">
+  <div class="draw-stage-title" id="do-stage"></div>
+  <div class="draw-pot-label" id="do-pot"></div>
+  <div class="draw-cards-row" id="do-cards"></div>
+  <div class="draw-progress" id="do-pips"></div>
+  <button id="draw-skip" onclick="skipDraw()">Skip animation</button>
 </div>
 
 <div id="mbg" onclick="closeMod()">
@@ -412,35 +464,149 @@ function go(v) {
 function askDraw() { PK.length ? document.getElementById('mbg').classList.add('on') : doDraw(); }
 function closeMod() { document.getElementById('mbg').classList.remove('on'); }
 
+// ── SEEDED POTS ───────────────────────────────────────────────────────────────
+// Ranked by FIFA world ranking / tournament pedigree
+var POT_ORDER = [
+  'Argentina','France','Spain','England','Brazil','Portugal',
+  'Germany','Netherlands','Belgium','United States','Morocco','Japan',
+  // Pot 2
+  'Colombia','Uruguay','Croatia','Switzerland','Mexico','Senegal',
+  'South Korea','Austria','Denmark','Ecuador','Egypt','Australia',
+  // Pot 3
+  'Canada','Türkiye','Norway','Sweden','Qatar','Saudi Arabia',
+  'Iran','Czechia','South Africa','Ghana','Côte d'Ivoire','Serbia',
+  // Pot 4 - rest
+];
+
+function getPots(teams) {
+  // Sort teams by pot order, anything not listed goes in pot 4
+  var sorted = teams.slice().sort(function(a,b){
+    var ai = POT_ORDER.indexOf(a.name);
+    var bi = POT_ORDER.indexOf(b.name);
+    if(ai<0) ai=999; if(bi<0) bi=999;
+    return ai-bi;
+  });
+  var n = Math.ceil(sorted.length / 4);
+  return [
+    sorted.slice(0, n),
+    sorted.slice(n, n*2),
+    sorted.slice(n*2, n*3),
+    sorted.slice(n*3),
+  ];
+}
+
+var _drawSkipped = false;
+var _drawResolve = null;
+
+function skipDraw() {
+  _drawSkipped = true;
+  if (_drawResolve) _drawResolve();
+}
+
+function wait(ms) {
+  if (_drawSkipped) return Promise.resolve();
+  return new Promise(function(resolve) {
+    _drawResolve = resolve;
+    setTimeout(resolve, ms);
+  });
+}
+
 async function doDraw() {
-  closeMod(); busy=true; setStatus('sync','Drawing…');
+  closeMod(); busy=true; _drawSkipped=false; _drawResolve=null;
+  setStatus('sync','Drawing…');
   var btn=document.getElementById('draw-btn');
   if(btn){ btn.disabled=true; btn.textContent='Drawing…'; }
+
   try {
     await api('team_progress?id=gt.0','DELETE');
     await api('draft_picks?id=gt.0','DELETE');
 
-    var n=PP.length, sh=shuf(TT), per=Math.floor(sh.length/n), ins=[];
-    var slots = PP.map(function(p,i){ return {p:p, teams:sh.slice(i*per,(i+1)*per)}; });
-    slots.forEach(function(s){ s.teams.forEach(function(t){ ins.push({participant_id:s.p.id,team_id:t.id,is_bonus:false}); }); });
+    var pots = getPots(TT);
+    var potNames = ['Pot 1 — Elite','Pot 2 — Strong','Pot 3 — Mid','Pot 4 — Underdogs'];
+    var potClasses = ['pot1r','pot2r','pot3r','pot4r'];
+    var potColors = ['#fde68a','#e5e7eb','#fed7aa','#bfdbfe'];
 
-    // Fair bonus: leftovers go to weakest draws
-    var strong=['UEFA','CONMEBOL','Host'];
-    var leftovers=sh.slice(n*per);
-    if(leftovers.length){
-      var scored=slots.map(function(s,i){
-        return {i:i, score:s.teams.filter(function(t){ return strong.indexOf(t.confederation)>=0; }).length};
+    // Shuffle participants for draw order
+    var drawOrder = shuf(PP.slice());
+    // assignments[pid] = [team, team, team, team]
+    var assignments = {};
+    PP.forEach(function(p){ assignments[p.id] = []; });
+
+    // From each pot, shuffle and assign one team per person
+    var ins = [];
+    for (var pi=0; pi<4; pi++) {
+      var potTeams = shuf(pots[pi].slice());
+      drawOrder.forEach(function(p, i) {
+        var team = potTeams[i % potTeams.length];
+        assignments[p.id].push(team);
+        ins.push({participant_id:p.id, team_id:team.id, is_bonus:false});
       });
-      scored.sort(function(a,b){ return a.score-b.score; });
-      leftovers.forEach(function(t,j){ ins.push({participant_id:PP[scored[j].i].id,team_id:t.id,is_bonus:true}); });
     }
 
+    // ── Show draw overlay ─────────────────────────────────────────────────────
+    var overlay = document.getElementById('draw-overlay');
+    var stageEl = document.getElementById('do-stage');
+    var potEl   = document.getElementById('do-pot');
+    var cardsEl = document.getElementById('do-cards');
+    var pipsEl  = document.getElementById('do-pips');
+
+    // Build pips
+    pipsEl.innerHTML = '';
+    for(var q=0;q<4;q++){
+      var pip=document.createElement('div');
+      pip.className='draw-pip';
+      pip.id='pip'+q;
+      pipsEl.appendChild(pip);
+    }
+
+    overlay.classList.add('on');
+
+    for (var pot=0; pot<4; pot++) {
+      document.getElementById('pip'+pot).className='draw-pip active';
+      stageEl.textContent = 'Drawing ' + potNames[pot];
+      potEl.innerHTML='<span style="color:'+potColors[pot]+'">'+potNames[pot]+'</span>';
+      potEl.style.color = potColors[pot];
+
+      // Show all person cards blank
+      var cardHtml = '';
+      drawOrder.forEach(function(p) {
+        var nm = p.name.split(' ');
+        cardHtml += '<div class="draw-person-card" id="dpc'+p.id+'">'
+          + '<div class="dpname">'+nm[0]+'<br><span style="font-weight:500;opacity:0.7">'+nm.slice(1).join(' ')+'</span></div>'
+          + '<div class="dpteam" id="dpt'+p.id+'">?</div>'
+          + '</div>';
+      });
+      cardsEl.innerHTML = cardHtml;
+      await wait(600);
+
+      // Reveal each person one by one
+      for (var di=0; di<drawOrder.length; di++) {
+        var person = drawOrder[di];
+        var team = assignments[person.id][pot];
+        var card = document.getElementById('dpc'+person.id);
+        var teamEl = document.getElementById('dpt'+person.id);
+        if(card && teamEl){
+          teamEl.innerHTML = flagImg(team.name, 18) + ' ' + team.name;
+          card.className = 'draw-person-card ' + potClasses[pot];
+        }
+        await wait(_drawSkipped ? 0 : 350);
+      }
+
+      await wait(_drawSkipped ? 0 : 1200);
+      document.getElementById('pip'+pot).className='draw-pip done';
+    }
+
+    await wait(_drawSkipped ? 0 : 800);
+    overlay.classList.remove('on');
+
+    // Save to DB
     PK = await api('draft_picks','POST',ins);
     PR = [];
     setStatus('live','Live');
-    toast('✅ Draw complete — good luck!');
+    toast('✅ Draw complete — good luck everyone!');
     renderAll();
   } catch(e) {
+    document.getElementById('draw-overlay').classList.remove('on');
     setStatus('err','Draw failed');
     toast('❌ Draw failed: ' + e.message.slice(0,80));
   } finally { busy=false; }
