@@ -467,15 +467,18 @@ function closeMod() { document.getElementById('mbg').classList.remove('on'); }
 // ── SEEDED POTS ───────────────────────────────────────────────────────────────
 // Ranked by FIFA world ranking / tournament pedigree
 var POT_ORDER = [
-  'Argentina','France','Spain','England','Brazil','Portugal',
-  'Germany','Netherlands','Belgium','United States','Morocco','Japan',
+  // Pot 1
+  'Spain','Argentina','France','England','Brazil','Portugal',
+  'Netherlands','Belgium','Germany','Croatia','Morocco','Colombia',
   // Pot 2
-  'Colombia','Uruguay','Croatia','Switzerland','Mexico','Senegal',
-  'South Korea','Austria','Denmark','Ecuador','Egypt','Australia',
+  'USA','Mexico','Uruguay','Japan','Switzerland','Denmark',
+  'Senegal','Austria','Iran','South Korea','Ecuador','Australia',
   // Pot 3
-  'Canada','Türkiye','Norway','Sweden','Qatar','Saudi Arabia',
-  'Iran','Czechia','South Africa','Ghana','Cote d`Ivoire','Serbia',
-  // Pot 4 - rest
+  'Algeria','Egypt','Norway','Serbia','Czechia','Scotland',
+  'Türkiye','Poland','Ivory Coast','Tunisia','Canada','Paraguay',
+  // Pot 4
+  'South Africa','Ghana','Qatar','Saudi Arabia','Uzbekistan','DR Congo',
+  'Panama','Costa Rica','Slovakia','Cameroon','New Zealand','Haiti'
 ];
 
 function getPots(teams) {
